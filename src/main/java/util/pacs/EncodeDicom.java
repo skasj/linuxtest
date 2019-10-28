@@ -26,6 +26,10 @@ public class EncodeDicom {
         }
     }
 
+    private void parseDicom(){
+
+    }
+
     private void testOnloacl (){
         File dicom = new File("C:\\Users\\99324\\Desktop\\0731测试用Dicom\\Dicom剪切\\008370多格式\\native.dcm");
 //        File dicom_native = new File("C:\\Users\\99324\\Desktop\\0731测试用Dicom\\Dicom剪切\\008370多格式\\native.dcm");

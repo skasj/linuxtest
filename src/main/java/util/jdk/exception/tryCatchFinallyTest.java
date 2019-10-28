@@ -1,5 +1,7 @@
 package util.jdk.exception;
 
+import java.io.FileOutputStream;
+
 /**
  * @program: linuxtest
  * @description:
@@ -39,10 +41,12 @@ public class tryCatchFinallyTest {
                 LostMessage lostMessage = new LostMessage();
                 try {
                     lostMessage.f();
-                } catch (Exception e) {
-                    e.printStackTrace();
                 } finally {
-                    lostMessage.v();
+                    try {
+                        lostMessage.v();
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace(System.err);
