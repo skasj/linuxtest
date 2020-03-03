@@ -5,6 +5,9 @@ import com.deepwise.cloud.util.UtilLogger;
 import com.luciad.imageio.webp.WebPImageReaderSpi;
 import com.luciad.imageio.webp.WebPImageWriterSpi;
 import com.luciad.imageio.webp.WebPWriteParam;
+import java.awt.Graphics;
+import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +30,9 @@ import java.util.concurrent.Executors;
  * @create: 2019-03-25 10:13
  */
 public class Dicom2WebP {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Dicom2WebP.class);
-    
+
     /**
      * 注册webp的Native方法
      */
@@ -37,12 +40,12 @@ public class Dicom2WebP {
     /** 线程池，数量依据——小于等于CPU内核数量/2 */
     private static ExecutorService service = Executors.newFixedThreadPool(1);
     private static String DefaultCompressionType = "Lossless";
-    
+
     static{
         iioRegistry.registerServiceProvider(new WebPImageWriterSpi());
         iioRegistry.registerServiceProvider(new WebPImageReaderSpi());
     }
-    
+
     /**
      * 调试方法
      * @param args
@@ -63,7 +66,7 @@ public class Dicom2WebP {
         }
         service.shutdown();
     }
-    
+
     /**
      * Jpg转webP
      *
@@ -96,7 +99,7 @@ public class Dicom2WebP {
             UtilLogger.error(LOGGER, e, "dicom文件:", src.getAbsolutePath());
         }
     }
-    
+
     private File generateTargetFile(File src){
         if (null == src || !src.exists()){
             return null;
@@ -110,4 +113,6 @@ public class Dicom2WebP {
         String targetFilePath = tarDir.getAbsolutePath() + UtilConstant.Separator.SLASH + srcName + ".webp";
         return new File(targetFilePath);
     }
+
+
 }

@@ -32,19 +32,23 @@ import org.opencv.imgproc.Imgproc;
 public class DetectBreastPosition {
 
     private static JSONObject jsonObject = JSON
-            .parseObject("{\"is_inverse\":false,\"sum_y0\":0,\"cm_col_sum_up_thresh\":1000}");
+            .parseObject("{\"is_inverse\":false,\"sum_y0\":100,\"cm_col_sum_up_thresh\":16000}");
 
     public static void main(String[] args) {
         DetectBreastPosition detectBreastPosition = new DetectBreastPosition();
         for (int i = 1001; i < 1005; i++) {
             System.out.println(i);
             BufferedImage mgDicom = detectBreastPosition
-                    .readMGDicom("C:\\Users\\99324\\Desktop\\1031fix迁移\\钼靶像位信息判断\\" + i + ".dcm");
-            getLaterality(mgDicom);
+                    .readMGDicom("C:\\Users\\99324\\Desktop\\1031fix迁移\\钼靶像位信息判断\\" + i);
+            getViewPositionAndLaterality(mgDicom,i);
         }
+//
+//        BufferedImage mgDicom = detectBreastPosition
+//                .readMGDicom("C:\\Users\\99324\\Desktop\\1031fix迁移\\222\\DICOM\\PT0\\ST0\\SE1\\IM0");
+//        getViewPositionAndLaterality(mgDicom,1001);
     }
 
-    private static void getLaterality(BufferedImage mgDicom) {
+    private static void getViewPositionAndLaterality(BufferedImage mgDicom,int i) {
         Mat src = Mat.eye(mgDicom.getHeight(), mgDicom.getWidth(), CvType.CV_8U);
         src.put(0, 0, ((DataBufferByte) mgDicom.getRaster().getDataBuffer()).getData());
         int thresh_mode = jsonObject.getBoolean("is_inverse") ? Imgproc.THRESH_BINARY_INV + Imgproc.THRESH_OTSU
@@ -52,8 +56,7 @@ public class DetectBreastPosition {
         Mat tar = Mat.eye(mgDicom.getHeight(), mgDicom.getWidth(), CvType.CV_8U);
         System.out.println(Imgproc.threshold(src, tar, 0, 255, thresh_mode));
         src.release();
-//        writeMatToJPEG(tar);
-//        Imgcodecs.imwrite("C:\\Users\\99324\\Desktop\\1031fix迁移\\钼靶像位信息判断\\5.jpeg",tar);
+        writeMatToJPEG(tar,i);
         double left = 0, right = 0;
         int borderline = tar.cols() / 10;
         for (int row = 0; row < tar.rows(); row++) {
@@ -81,12 +84,12 @@ public class DetectBreastPosition {
         System.out.printf("%s-%s\n", laterality, viewPosition);
     }
 
-    private static void writeMatToJPEG(Mat tar) {
+    private static void writeMatToJPEG(Mat tar,int i) {
         MatOfByte mob = new MatOfByte();
         Imgcodecs.imencode(".jpg", tar, mob);
         byte[] byteArray = mob.toArray();
         BufferedImage bufImage = null;
-        File jpeg = new File("C:\\Users\\99324\\Desktop\\1031fix迁移\\钼靶像位信息判断\\5.jpeg");
+        File jpeg = new File("C:\\Users\\99324\\Desktop\\1031fix迁移\\钼靶像位信息判断\\"+i+".jpeg");
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(jpeg)) {
             InputStream in = new ByteArrayInputStream(byteArray);
             bufImage = ImageIO.read(in);
