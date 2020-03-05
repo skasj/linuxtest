@@ -181,16 +181,24 @@ public class UtilDataType {
      * @param sArr
      * @return attribute不支持 setShorts 所以做个转换
      */
-    public static byte[] shortArrToByteArr(short[] sArr) {
+    public static byte[] shortArrToByteArr(short[] sArr, boolean bigEndian) {
         if (sArr == null || sArr.length == 0) {
             return new byte[0];
         }
         byte[] byteArr = new byte[sArr.length * 2];
         short s;
-        for (int i = 0, j = 0; j < sArr.length; ) {
-            s = sArr[j++];
-            byteArr[i++] = (byte) s;
-            byteArr[i++] = (byte) (s >> 8);
+        if (bigEndian) {
+            for (int i = 0, j = 0; j < sArr.length; ) {
+                s = sArr[j++];
+                byteArr[i++] = (byte) (s >> 8);
+                byteArr[i++] = (byte) s;
+            }
+        } else {
+            for (int i = 0, j = 0; j < sArr.length; ) {
+                s = sArr[j++];
+                byteArr[i++] = (byte) s;
+                byteArr[i++] = (byte) (s >> 8);
+            }
         }
         return byteArr;
     }
