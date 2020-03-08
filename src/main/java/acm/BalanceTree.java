@@ -1,6 +1,5 @@
 package acm;
 
-import javax.xml.transform.Source;
 
 /**
  * @program: linuxtest
@@ -40,31 +39,36 @@ public class BalanceTree {
         return Math.max(left,right)+1;
     }
 
+    public static class ResultType {
+        int simpleMaxSum = 0;
+        int maxSum= 0;
+
+        public ResultType(int simpleMaxSum, int maxSum) {
+            this.simpleMaxSum = simpleMaxSum;
+            this.maxSum = maxSum;
+        }
+    }
+
     /**
      * @param root: The root of binary tree.
      * @return: An integer
      */
     public int maxPathSum(TreeNode root) {
         // write your code here
-        if (null == root){
-            return 0;
-        }
-        int left = maxSum(root.left);
-        int right = maxSum(root.right);
-        left = left < 0 ? 0 : left;
-        right = right < 0 ? 0 : right;
-        return left+root.val+right;
+        ResultType resultType = maxSum(root);
+        return resultType.maxSum;
     }
 
-    private int maxSum(TreeNode root){
+    private ResultType maxSum(TreeNode root){
+        ResultType resultType = new ResultType(Integer.MIN_VALUE, Integer.MIN_VALUE);
         if (null == root){
-            return 0;
-        } else {
-            int left = maxSum(root.left);
-            int right = maxSum(root.right);
-            left = left < 0 ? 0 : left;
-            right = right < 0 ? 0 : right;
-            return Math.max(left,right)+root.val;
+            return resultType;
+        }else {
+            ResultType left = maxSum(root.left);
+            ResultType right = maxSum(root.right);
+            resultType.simpleMaxSum =Math.max(0,Math.max(left.simpleMaxSum,right.simpleMaxSum))+root.val;
+            resultType.maxSum =Math.max(Math.max(left.maxSum,right.maxSum),Math.max(0,left.simpleMaxSum)+Math.max(0,right.simpleMaxSum)+root.val);
+            return resultType;
         }
     }
 
