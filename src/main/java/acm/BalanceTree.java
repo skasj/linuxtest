@@ -101,7 +101,7 @@ public class BalanceTree {
 
     /**
      * @param root: The root of binary tree.
-     * @return: True if the binary tree is BST, or false
+     * @return: True if the binary tree is BST（Binary Search Tree）, or false
      */
     private IsValidBSTResultType isValidBSTHelper(TreeNode root) {
         // write your code here
