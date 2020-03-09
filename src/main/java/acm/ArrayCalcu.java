@@ -1,6 +1,5 @@
 package acm;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -102,5 +101,30 @@ public class ArrayCalcu {
             }
         }
         return majority;
+    }
+
+    /**
+     * @param nums: a rotated sorted array
+     * @return: the minimum number in the array
+     */
+    public int findMin(int[] nums) {
+        // write your code here
+        boolean isFilped = false;
+        int pre = Integer.MIN_VALUE;
+        int i = 0;
+        while (i<nums.length) {
+            if (pre>nums[i]){
+                isFilped = true;
+                break;
+            }
+            pre = nums[i];
+            i++;
+
+        }
+        if (isFilped){
+            return nums[i];
+        } else {
+            return nums[0];
+        }
     }
 }
