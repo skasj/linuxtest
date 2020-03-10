@@ -118,18 +118,57 @@ public class BalanceTree {
         return new IsValidBSTResultType(false);
     }
 
+    /**
+     * @param root: root of a tree
+     */
+    public TreeNode treeToDoublyList(TreeNode root) {
+        // Write your code here.
+        TreeNode tail = resetNodeLink(root, null);
+        TreeNode head = tail;
+        while (head.left != null){
+            head = head.left;
+        }
+        head.left = tail;
+        tail.right = head;
+        return head;
+    }
+
+
+    private TreeNode resetNodeLink(TreeNode root, TreeNode lastNodeInList) {
+        if (root == null){
+            return lastNodeInList;
+        }
+        if (root.left == null) {
+            if (lastNodeInList != null) {
+                lastNodeInList.right = root;
+                root.left = lastNodeInList;
+            }
+        } else {
+            lastNodeInList = resetNodeLink(root.left, lastNodeInList);
+            lastNodeInList.right = root;
+            root.left = lastNodeInList;
+        }
+        return resetNodeLink(root.right,root);
+    }
+
     public static void main(String[] args) {
-        TreeNode treeNode1 = new TreeNode(2147483647);
-                TreeNode treeNode2 = new TreeNode(2147483646);
-        //        TreeNode treeNode3 = new TreeNode(-5);
-        //        TreeNode treeNode4 = new TreeNode(4);
-        //        TreeNode treeNode6 = new TreeNode(5);
-        //        TreeNode treeNode7 = new TreeNode(6);
-                treeNode1.left = treeNode2;
-        //        treeNode1.right = treeNode3;
-        //        treeNode2.left = treeNode4;
-        //        treeNode3.left = treeNode6;
-        //        treeNode3.right = treeNode7;
-        System.out.println(new BalanceTree().isValidBST(treeNode1));
+        TreeNode treeNode1 = new TreeNode(62);
+        TreeNode treeNode2 = new TreeNode(23);
+        TreeNode treeNode3 = new TreeNode(65);
+        TreeNode treeNode4 = new TreeNode(6);
+        TreeNode treeNode5 = new TreeNode(4);
+        TreeNode treeNode6 = new TreeNode(16);
+        treeNode1.left = treeNode2;
+        treeNode1.right = treeNode3;
+        treeNode2.left = treeNode4;
+        treeNode3.right = treeNode5;
+        treeNode4.left = treeNode6;
+        TreeNode head = new BalanceTree().treeToDoublyList(treeNode1);
+        TreeNode index = head;
+        while (index.right.val != head.val){
+            System.out.println(index.val);
+            index = index.right;
+        }
+        System.out.println(index.val);
     }
 }
