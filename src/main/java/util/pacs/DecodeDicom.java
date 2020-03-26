@@ -21,8 +21,8 @@ public class DecodeDicom {
     public static void main(String[] args) {
         System.loadLibrary("opencv_java320");
         try {
-           new  DecodeDicom().testOnloacl();
-//            testOnLinux();
+//           new  DecodeDicom().testOnloacl();
+            testOnLinux();
         } catch (Exception e) {
             e.printStackTrace();
         }

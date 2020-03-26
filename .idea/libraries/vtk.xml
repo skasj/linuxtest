@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="vtk">
+    <CLASSES>
+      <root url="jar://D:/VisualStudio/vtkBuild/bin/vtk.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://D:/VisualStudio/vtkBuild/bin/vtk.jar!/" />
+    </SOURCES>
+  </library>
+</component>
