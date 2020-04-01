@@ -27,5 +27,8 @@ public class test {
         System.out.println("b:"+b);
         System.out.println("窗宽"+tw);
         System.out.println("窗位"+tl);
+
+        double t = 0.004d;
+        System.out.println(String.format("%.2f",t));
     }
 }

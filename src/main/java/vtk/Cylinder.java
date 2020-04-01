@@ -15,6 +15,7 @@ public class Cylinder {
             }
         }
         vtkNativeLibrary.DisableOutputWindow(null);
+        vtkNativeLibrary.DisableOutputWindow(null);
     }
 
     private void helloworld(){
