@@ -11,11 +11,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
+import org.opencv.core.MatOfPoint2f;
 
 /**
  * @program: linuxtest
@@ -26,6 +28,12 @@ import org.apache.commons.collections.CollectionUtils;
 public class CaculNodeLine {
 
     static {
+        System.out.println("测试");
+        System.out.println("java.library.path:"+System.getProperty("java.library.path"));
+//        vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.VTKCOMMONCORE);
+//        vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.VTKFILTERSCORE);
+//        vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.VTKCOMMONDATAMODEL);
+//        vtkNativeLibrary.LoadNativeLibraries(vtkNativeLibrary.VTKCOMMONEXECUTIONMODEL);
         if (!vtkNativeLibrary.LoadAllNativeLibraries()) {
             for (vtkNativeLibrary lib : vtkNativeLibrary.values()) {
                 if (!lib.IsLoaded()) {
@@ -38,6 +46,9 @@ public class CaculNodeLine {
     }
 
     public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        String s = scanner.nextLine();
+        System.out.println("测试");
         CaculNodeLine caculNodeLine = new CaculNodeLine();
         String nodeString = "{\n"
                 + "  \"ct_value_avg\": 278.5,\n"
@@ -672,13 +683,17 @@ public class CaculNodeLine {
                 + "}";
         // 获取结节的所有轮廓点
         vtkPoints ps = caculNodeLine.getPoints(nodeString);
+        long t1 = System.currentTimeMillis();
         ps = caculNodeLine.getPoints(caculNodeLine.findSimple3dRois(ps), ps);
+        long t2 = System.currentTimeMillis();
         System.out.println(caculNodeLine.generateNode(ps));
-
+        System.out.println("单个结节计算总耗时:" + (t2 - t1));
+        return;
     }
 
     private List<DeepwiseEdge> findSimple3dRois(vtkPoints ps) {
         vtkDelaunay3D delaunay3D = getVtkDelaunay3D(ps);
+        long t0 = System.currentTimeMillis();
         vtkUnstructuredGrid grid = delaunay3D.GetOutput();
         if (null == grid) {
             return new ArrayList<>();
@@ -688,12 +703,17 @@ public class CaculNodeLine {
         long t1 = System.currentTimeMillis();
         // 获取所有表面(去除体积内部的面)
         getOutsideFace(grid, face, edge);
+        long t2 = System.currentTimeMillis();
         // 获取所有平面边缘线段(去除面内部的线段)
         getOutsideLine(face, edge, grid.GetPoints());
+        long t3 = System.currentTimeMillis();
         // 合并统一直线上的线段
         List<DeepwiseEdge> outsidePoint =getOutsidePoint(edge, grid.GetPoints());
-        long t2 = System.currentTimeMillis();
-        System.out.println("计算耗时" + (t2 - t1));
+        long t4 = System.currentTimeMillis();
+        System.out.println(
+                "三角剖分耗时" + (t1 - t0) + "优化总耗时" + (t4 - t1) + "去除内部表面:" + (t2 - t1) + "去除内部线段和重复线段:" + (t3 - t2)
+                        + "线段合并:" + (t4 - t3) + "边数量:"
+                        + outsidePoint.size());
         return outsidePoint;
     }
 
@@ -860,8 +880,8 @@ public class CaculNodeLine {
         public boolean equals(Object obj) {
             if (obj instanceof DeepwiseEdge) {
                 DeepwiseEdge student = (DeepwiseEdge) obj;
-                return pointsIds[0] == ((DeepwiseEdge) obj).pointsIds[0]
-                        && pointsIds[1] == ((DeepwiseEdge) obj).pointsIds[1];
+                return pointsIds[0] == student.pointsIds[0]
+                        && pointsIds[1] == student.pointsIds[1];
             } else {
                 return false;
             }
@@ -874,6 +894,22 @@ public class CaculNodeLine {
     private static class DeepwiseFace {
 
         int[] pointsIds;
+
+        public int hashCode() {
+            return (pointsIds[0] + "-" + pointsIds[1] + "-" + pointsIds[2]).hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof DeepwiseEdge) {
+                DeepwiseEdge student = (DeepwiseEdge) obj;
+                return pointsIds[0] == student.pointsIds[0]
+                        && pointsIds[1] == student.pointsIds[1]
+                        && pointsIds[2] == student.pointsIds[2];
+            } else {
+                return false;
+            }
+        }
     }
 
     private void calculateSlope(DeepwiseEdge edge, vtkPoints points) {
@@ -941,15 +977,35 @@ public class CaculNodeLine {
      *
      * @return
      */
+//    private vtkPoints getPoints(String nodeString) {
+//        // 录入已有节点和边框
+//        Node node = JSONObject.parseObject(nodeString, Node.class);
+//        vtkPoints ps = new vtkPoints();
+//        for (Roi roi : node.getRois()) {
+//            int z = roi.getSliceIndex();
+//            for (int i = 0; i < roi.getEdge().size(); i++) {
+//                List<Double> point = roi.getEdge().get(i);
+//                ps.InsertNextPoint(point.get(0), point.get(1), z);
+//            }
+//        }
+//        return ps;
+//    }
+
     private vtkPoints getPoints(String nodeString) {
         // 录入已有节点和边框
         Node node = JSONObject.parseObject(nodeString, Node.class);
+        // 录入已有节点和边框
         vtkPoints ps = new vtkPoints();
         for (Roi roi : node.getRois()) {
             int z = roi.getSliceIndex();
-            for (int i = 0; i < roi.getEdge().size(); i++) {
-                List<Double> point = roi.getEdge().get(i);
-                ps.InsertNextPoint(point.get(0), point.get(1), z);
+            MatOfPoint2f matOfPoint2f = UtilApproxPolyDP
+                    .approxPolyDP(roi.getEdge(), 0.5);
+            if (null == matOfPoint2f || matOfPoint2f.empty()){
+                continue;
+            }
+            for (int i = 0; i < matOfPoint2f.rows(); i++) {
+                double[] pointXY = matOfPoint2f.get(i, 0);
+                ps.InsertNextPoint(pointXY[0],pointXY[1],z);
             }
         }
         return ps;
@@ -981,15 +1037,16 @@ public class CaculNodeLine {
      * @return
      */
     private vtkDelaunay3D getVtkDelaunay3D(vtkPoints ps) {
-//        long t1 = System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
         vtkPolyData polyData = new vtkPolyData();
         polyData.SetPoints(ps);
 
+        long t2 = System.currentTimeMillis();
         vtkDelaunay3D d3d = new vtkDelaunay3D();
         d3d.SetInputData(polyData);
         d3d.Update();
-//        long t2 = System.currentTimeMillis();
-//        System.out.println("耗时1:" + (t2 -t1));
+        long t3 = System.currentTimeMillis();
+        System.out.println("耗时1:" + (t2 - t1) + " 耗时2:" + (t3 - t2));
         return d3d;
     }
 }

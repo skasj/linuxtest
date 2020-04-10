@@ -79,6 +79,12 @@
             <artifactId>dw-cloud-open-client</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!-- vtk相关 -->
+        <dependency>
+            <groupId>kitware.community.deepwise</groupId>
+            <artifactId>vtk-java</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <build>
